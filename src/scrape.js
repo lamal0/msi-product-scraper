@@ -142,14 +142,34 @@ function buildProduct(raw, finalUrl) {
   };
 }
 
+async function launchBrowser() {
+  const launchOptions = {
+    headless: true,
+    args: ['--disable-blink-features=AutomationControlled'],
+  };
+  try {
+    // Prefer the real, locally installed Chrome: its network/TLS fingerprint
+    // matches a normal browser, which the target site's bot protection
+    // otherwise flags and blocks when using Playwright's bundled Chromium.
+    return await chromium.launch({ ...launchOptions, channel: 'chrome' });
+  } catch (err) {
+    console.warn('Google Chrome channel not available, falling back to bundled Chromium.');
+    return chromium.launch(launchOptions);
+  }
+}
+
 async function scrapeProduct() {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchBrowser();
   try {
     const context = await browser.newContext({
       userAgent:
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
       viewport: { width: 1366, height: 900 },
       locale: 'en-US',
+      extraHTTPHeaders: { 'Accept-Language': 'en-US,en;q=0.9' },
+    });
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
     });
     const page = await context.newPage();
 

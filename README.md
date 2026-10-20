@@ -9,12 +9,14 @@ Target page: https://us-store.msi.com/Motherboards/Intel-Platform-Motherboard/IN
 
 - Node.js 18+
 - npm
+- Google Chrome installed on the machine (see note below)
 
 ## Installation
 
 ```bash
 npm install
 npx playwright install chromium
+npx playwright install chrome
 ```
 
 ## Usage
@@ -23,9 +25,20 @@ npx playwright install chromium
 npm run scrape
 ```
 
-This opens the product page in headless Chromium, extracts the data below,
-and writes the result to `output/product.json` (created or overwritten on
-every run).
+This opens the product page in headless Chrome, extracts the data below, and
+writes the result to `output/product.json` (created or overwritten on every
+run).
+
+### Why Google Chrome instead of bundled Chromium
+
+The store's edge/WAF (Akamai) returns a `403 Access Denied` for requests from
+Playwright's bundled Chromium build, even in a normal residential network,
+while a manually opened browser on the same machine loads the page fine. The
+scraper therefore launches via Playwright's `channel: 'chrome'`, i.e. the
+real, locally installed Chrome binary, which has the same network/TLS
+fingerprint as a normal browser and is not blocked. It falls back to the
+bundled Chromium (`npx playwright install chromium`) if Chrome is not found,
+but that fallback may get blocked by the same bot protection.
 
 ## Where each field comes from
 
@@ -73,3 +86,7 @@ from the rendered DOM.
   live in-stock item at the time of writing.
 - The scraper targets this single product page layout; it is not a generic
   MSI store scraper.
+- Requires a real Chrome install because of the bot-protection behavior
+  described above; a CI/server environment without Chrome available would
+  need it installed first (e.g. `npx playwright install chrome` or a system
+  package), otherwise the Chromium fallback may be blocked.
