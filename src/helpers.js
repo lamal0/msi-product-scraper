@@ -12,9 +12,6 @@ function parsePrice(value) {
   return Number.isFinite(num) ? num : null;
 }
 
-// Within the price area, there can be one amount (regular price) or two
-// (an original price and a discounted price). The larger amount is always
-// the regular price and the smaller one is the sale price.
 function parsePricePair(text) {
   if (typeof text !== 'string') return { price: null, salePrice: null };
   const matches = text.match(/\$\s?-?[\d,]+(?:\.\d+)?/g) || [];

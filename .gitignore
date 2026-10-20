@@ -1,6 +1,4 @@
 node_modules/
 .env
 *.log
-
-# Playwright browser binaries (installed via `npx playwright install`)
 ms-playwright/

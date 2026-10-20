@@ -148,9 +148,6 @@ async function launchBrowser() {
     args: ['--disable-blink-features=AutomationControlled'],
   };
   try {
-    // Prefer the real, locally installed Chrome: its network/TLS fingerprint
-    // matches a normal browser, which the target site's bot protection
-    // otherwise flags and blocks when using Playwright's bundled Chromium.
     return await chromium.launch({ ...launchOptions, channel: 'chrome' });
   } catch (err) {
     console.warn('Google Chrome channel not available, falling back to bundled Chromium.');
